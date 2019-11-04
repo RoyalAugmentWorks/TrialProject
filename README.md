@@ -1,6 +1,9 @@
 # TrialProject
 Repository for the trial projects.
 
+Use TestBinary:-
+1) Simply go to the TestBinary folder and Execute VehicleInfo.exe file to see the working of the GUI.
+
 
 To Use the Vehicle Look up widget.
 Simply follow this steps:-
