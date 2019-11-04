@@ -11,7 +11,6 @@
  * Qt Version :- 5.13.1
  *
  * File :- DVHlpvehiclelookup.h
- * Author :- Royal B.K
  * Last Modified:- 11/04/2019.
  *
  *
