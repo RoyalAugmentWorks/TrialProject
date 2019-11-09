@@ -5,6 +5,7 @@
 #include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QLineEdit>
 #include <QDebug>
 
 /*!
@@ -27,7 +28,13 @@
  *              - Step 3:- Populate the values in the comboBox_model.
  *
  *         Similar workflow can be observed in all further options.
+ *
+ *
+ * Corrections Made After the Review:- Please refer the tag CHANGES_WithSomeMessagesRelatedToChanges.
  */
+
+
+
 namespace Ui {
 class DVUI_LeftPanelVehicleLookup;
 }
@@ -50,12 +57,16 @@ public:
     /*!
      * \brief Update - Read the File, Populate the database, Update the UI
      */
-    void Update();
+    void UpdateFromFile();//CHANGES_Function name changed to avoid confusion with Qwidgets update function.
+
 
 private slots:
     void on_comboBox_year_currentTextChanged(const QString &arg1);
-    void on_comboBox_model_currentTextChanged(const QString &arg1);
+    void on_comboBox_make_currentTextChanged(const QString &arg1);
+    /* CHANGES_Model selection is done now only after make selection
+    Previously the issue was with the requirement doc only regarding make vs model which to populate first.*/
     void on_pushButton_submit_clicked();
+
 
 private:
     /*!
@@ -77,12 +88,17 @@ private:
     /*!
      * \brief UpdateUIModel - Update the model without duplicates from the database to the UI.
      */
-    void UpdateUIModel(const QString &selected_year);
+    void UpdateUIMake(const QString &selected_year);
 
     /*!
-     * \brief UpdateUIMake - Update the Make without duplicates from the database to the UI.
+     * \brief UpdateUIModel - Update the Model without duplicates from the database to the UI.
      */
-    void UpdateUIMake(const QString &selected_model);
+    void UpdateUIModel(const QString &selected_make);
+
+    /*!
+     * \brief SetUIText - Query from the database and update the UI
+     */
+    void SetUIText(QString value, QLineEdit * line_edit);
 
     Ui::DVUI_LeftPanelVehicleLookup *ui;
     QSqlDatabase vehicle_database_;

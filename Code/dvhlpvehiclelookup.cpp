@@ -1,9 +1,11 @@
 #include "DVHlpvehiclelookup.h"
 #include "ui_DVUI_LeftPanelVehicleLookup.h"
-#include "QMessageBox"
-#include "QFile"
-#include "QFileInfo"
-#include "QStringListModel"
+
+//CHANGES_Below includes have been updated with <> instead of " " to avoid unnecessary lookup of files into current directory.
+#include <QMessageBox>
+#include <QFile>
+#include <QFileInfo>
+#include <QStringListModel>
 
 
 
@@ -11,17 +13,17 @@ DVHlpvehiclelookup::DVHlpvehiclelookup(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DVUI_LeftPanelVehicleLookup)
 {
-    // CHeck the database
+    // Check the database ,CHANGES_H in CHeck corrected to check.
     const QString DRIVER("QSQLITE");
     if(QSqlDatabase::isDriverAvailable(DRIVER))
     {
-        qDebug()<<"SQLITE Driver : Found!"<<endl;
+        qDebug() << "SQLITE Driver : Found!" << endl;
         vehicle_database_  = QSqlDatabase::addDatabase(DRIVER);
         vehicle_database_.setDatabaseName(":memory:");
-
     }
-    else {
-        qDebug()<<"SQLITE Driver : not Found!"<<endl;
+    else
+    {
+        qDebug() << "SQLITE Driver : not Found!" << endl;
     }
 
     ui->setupUi(this);
@@ -29,13 +31,15 @@ DVHlpvehiclelookup::DVHlpvehiclelookup(QWidget *parent) :
 
 DVHlpvehiclelookup::~DVHlpvehiclelookup()
 {
+    //CHANGES_Code has been updated while  maintaining consistency especially in the  spaces.
     if ( vehicle_database_.isOpen() )
-        qDebug() << "the database is:  open" <<endl;
+        qDebug() << "The database is:  Open" << endl;
     else
-        qDebug()<< "the database is:  Closed" <<endl;
+        qDebug() << "The database is:  Closed" << endl;
 
     vehicle_database_.removeDatabase( QSqlDatabase::defaultConnection );
     delete ui;
+
 }
 
 void DVHlpvehiclelookup::SetSourceFile(const QString &file)
@@ -43,13 +47,18 @@ void DVHlpvehiclelookup::SetSourceFile(const QString &file)
     file_ = file;
 }
 
-void DVHlpvehiclelookup::Update()
+void DVHlpvehiclelookup::UpdateFromFile()
 {
 
     if(!UpdateDatabase())
     {
-        qDebug()<<"ERROR: Reading CSV to SQL Database Failed! "<<endl;
+        //CHANGES_A pop up message added to inform the user about the failure of UpdateDatabase().
+        qDebug() << "ERROR: Reading CSV to SQL Database Failed! " << endl;
+        QMessageBox msg;
+        msg.setText("ERROR: Failed to read the file! Try restarting the application.");
+        msg.exec();
         return;
+
     }
 
     UpdateUI();
@@ -58,216 +67,156 @@ void DVHlpvehiclelookup::Update()
 }
 
 
-
-
 void DVHlpvehiclelookup::on_comboBox_year_currentTextChanged(const QString &year)
 {
-    UpdateUIModel(year);
+    UpdateUIMake(year);
 }
 
-void DVHlpvehiclelookup::on_comboBox_model_currentTextChanged(const QString &model)
+
+void DVHlpvehiclelookup::on_comboBox_make_currentTextChanged(const QString &make)
 {
-    UpdateUIMake(model);
+    UpdateUIModel(make);
+
 }
+
 
 void DVHlpvehiclelookup::on_pushButton_submit_clicked()
 {
-    // Get the Year
-    QString year = ui->comboBox_year->currentText();
 
-    // Get the Model
-    QString model = ui->comboBox_model->currentText();
-
-    // Get the Make
-    QString make = ui->comboBox_make->currentText();
-
-    //Values
-    QString OL_value;
-    QString OW_value;
-    QString OH_value;
-    QString WB_value;
-    QString CW_value;
-    QString A1_value;
-    QString B1_value;
-    QString C1_value;
-    QString D1_value;
-    QString E1_value;
-    QString F1_value;
-    QString G1_value;
-
-
-    //Query and Update
-    QSqlQuery query;
-
-    QString common_string1 = "SELECT DISTINCT ";
-    QString common_string2 = " FROM VehicleInfo "
-                             "WHERE MYR='"+year+"' "+
-            "AND MODEL='"+model+"' "+
-            "AND MAKE='"+make+"'";
-
-    QString query_string = common_string1+"OL"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        OL_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"OW"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        OW_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"OH"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        OH_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"WB"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        WB_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"CW"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        CW_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"A1"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        A1_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"B1"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        B1_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"C1"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        C1_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"D1"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        D1_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"E1"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        E1_value = query.value(0).toString();
-    }
-
-
-    query.clear();
-    query_string = common_string1+"F1"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        F1_value = query.value(0).toString();
-    }
-
-    query.clear();
-    query_string = common_string1+"G1"+common_string2;
-    query.exec(query_string);
-    while (query.next()) {
-        G1_value = query.value(0).toString();
-    }
-
-    //Update Values to UI
-    ui->lineEdit_OL->setText(OL_value);
-    ui->lineEdit_OW->setText(OW_value);
-    ui->lineEdit_OH->setText(OH_value);
-    ui->lineEdit_WB->setText(WB_value);
-    ui->lineEdit_CW->setText(CW_value);
-    ui->lineEdit_A1->setText(A1_value);
-    ui->lineEdit_B1->setText(B1_value);
-    ui->lineEdit_C1->setText(C1_value);
-    ui->lineEdit_D1->setText(D1_value);
-    ui->lineEdit_E1->setText(E1_value);
-    ui->lineEdit_F1->setText(F1_value);
-    ui->lineEdit_G1->setText(G1_value);
-
+    SetUIText("OL",ui->lineEdit_OL);
+    SetUIText("OW",ui->lineEdit_OW);
+    SetUIText("OH",ui->lineEdit_OH);
+    SetUIText("WB",ui->lineEdit_WB);
+    SetUIText("CW",ui->lineEdit_CW);
+    SetUIText("A1",ui->lineEdit_A1);
+    SetUIText("B1",ui->lineEdit_B1);
+    SetUIText("C1",ui->lineEdit_C1);
+    SetUIText("D1",ui->lineEdit_D1);
+    SetUIText("E1",ui->lineEdit_E1);
+    SetUIText("F1",ui->lineEdit_F1);
+    SetUIText("G1",ui->lineEdit_G1);
 
 }
 
 
 bool DVHlpvehiclelookup::UpdateDatabase()
 {
-    if(!vehicle_database_.open ()){
-        qDebug()<<"ERROR: DataBase not open!"<<endl;
+    if(!vehicle_database_.open ())
+    {
+        qDebug() << "ERROR: DataBase not open!" << endl;
         return  false;
     }
 
-    if(!QFileInfo(file_).exists()){
-        qDebug()<<"ERROR: File path does not exist!"<<endl;
+    if(!QFileInfo(file_).exists())
+    {
+        qDebug() << "ERROR: File path does not exist!" << endl;
         return  false;
     }
 
     QSqlQuery query;
     if(!query.exec("DROP TABLE VehicleInfo;"))
-        qDebug()<<"WARNING: Drop Vehicle Info Table Failed!"<<endl;
+        qDebug() << "WARNING: Drop Vehicle Info Table Failed!" << endl;
 
 
     //Read the File
     QFile f_handle(file_);
-    if(f_handle.open (QIODevice::ReadOnly)){
+    if(f_handle.open (QIODevice::ReadOnly))
+    {
         query.clear();
         QTextStream ts (&f_handle);
-        QString query_string;
 
         //Travel through the csv file
+        //Read the firt line and create a table with the details from the file as column titles.
+        // 2nd Row onwards simply keep updating the tables with the data from the file .
         unsigned int iteration_count = 0;
+        QString first_line_backup;
         while(!ts.atEnd()){
-            //Get the line
-            QStringList line = ts.readLine().split(',');
+
+            // Get the line and extract the data from it
+            QString line = ts.readLine();
+            qDebug()<<"CHECK LINE:"<<line<<endl;
+
+            QStringList list_values = line.split(",");
+            //If it is the first line save it as a column header names
             if(iteration_count == 0)
             {
-                //Create table query
-                query_string.append("CREATE TABLE VehicleInfo (");
+
+                //First line backup
+                first_line_backup = line;
+
+                //Prepare the create table query string to support dynamic table creation (based on n columns in the file) if it is the 1st row data
+                QString query_string = "CREATE TABLE VehicleInfo ("+ line +")";
+
+                //Prepare table query
+                query.prepare(query_string);
+
             }
             else
             {
-                //Insert values query
-                query_string.append("INSERT INTO VehicleInfo VALUES (");
+                /*Insert values query
+                Prepare the Insert data to table query string to support dynamic table data insertion
+                (based on n columns in the file) if it is the 1st row data*/
+                QString query_string = "INSERT INTO VehicleInfo ("+ first_line_backup +")VALUES (";
+
+                QStringList list_column_title = first_line_backup.split(",");
+
+                for(auto const &value :list_column_title)
+                {
+                    query_string.append(":"+value);
+                    //Do not add comma(,)  it is the last element . This avoids need for chopping .
+                    if(value != list_column_title.at(list_column_title.size()-1))
+                        query_string.append(", ");
+                }
+                query_string.append(")");
+
+                //Prepare table query
+                query.prepare(query_string);
+
+                //Bind the values now using QSqlquery bind
+
+                if(list_column_title.size()<list_values.size())
+                {
+                    QMessageBox msg;
+                    msg.setText("ERROR: Values are more than number of avaiable columns!Skipping..");
+                    msg.exec();
+                }
+                int iter = 0;
+                for(auto const &value :list_values)
+                {
+                    query.bindValue(":"+list_column_title.at(iter) , value);
+                    iter++;
+                }
+
             }
 
-            /*for every values on a line,
-                append it to the INSERT request*/
-            for(int i=0; i<line .length ();++i){
-                QString value = "'"+line.at(i)+"'";
-                query_string.append(value);
-                query_string.append(",");
+            if(query.exec())
+            {
+                qDebug() << "Query Success:" <<  query.lastQuery() << endl;
             }
-            query_string.chop(1); // remove the trailing comma
-            query_string.append(");"); // close the "VALUES([...]" with a ");"
-            if(query.exec(query_string))
-                qDebug()<<"Query Success:"<<query_string<<endl;
             else
-                qDebug()<<"Query Failed:"<<query_string<<endl;
+            {
+                qDebug() << "Query Failed:" <<    query.lastQuery() << endl;
+                QMessageBox msg;
+                msg.setText("ERROR: Failed to read  information from the File to database. Please try again");
+                msg.exec();
 
+                //incase of any failure do not proceed.
+                f_handle.close ();
+                return false;//File failed to Open.CHANGES_Better checks added incase of file failing to open.
 
-            query_string.clear();
+            }
+            query.clear();
 
             iteration_count++;
         }
         f_handle.close ();
     }
+    else
+    {
+        return false;//File failed to Open.CHANGES_Better checks added incase of file failing to open.
+    }
+
+    return true;//CHANGES_Better checks added if every thing goes well return true.
 }
 
 void DVHlpvehiclelookup::UpdateUI()
@@ -280,9 +229,23 @@ void DVHlpvehiclelookup::UpdateUIYear()
     QStringListModel *year_data_model = new QStringListModel;
     QSqlQuery query;
     QList<unsigned int> list_year_as_num;
+    query.prepare("SELECT DISTINCT MYR FROM VehicleInfo");
 
-    query.exec("SELECT DISTINCT MYR FROM VehicleInfo");
-    while (query.next()) {
+    if(query.exec())
+    {
+        qDebug() << "Query Success:" <<  query.lastQuery() << endl;
+    }
+    else
+    {
+        qDebug() << "Query Failed:" <<    query.lastQuery() << endl;
+        QMessageBox msg;
+        msg.setText("ERROR: Failed to query Year information from the database. Please try again");
+        msg.exec();
+        return ;// Failed Query
+    }
+
+    while (query.next())
+    {
         list_year_as_num.append(QString(query.value(0).toString()).toUInt());
     }
 
@@ -299,32 +262,89 @@ void DVHlpvehiclelookup::UpdateUIYear()
     ui->comboBox_year->setModel(year_data_model);
 }
 
-void DVHlpvehiclelookup::UpdateUIModel(const QString &selected_year)
+void DVHlpvehiclelookup::UpdateUIMake(const QString &selected_year)
 {
-    QStringListModel *vmodel_data_model = new QStringListModel;
-    QStringList list_vmodel;
-    QString query_string = "SELECT DISTINCT MODEL FROM VehicleInfo WHERE MYR='"+selected_year+"'";
+    QStringListModel *vmake_data_model = new QStringListModel;
+    QStringList list_vmake;
     QSqlQuery query;
-    query.exec(query_string);
-    while (query.next()) {
-        list_vmodel.append(query.value(0).toString());
+    query.prepare("SELECT DISTINCT MAKE "
+                  "FROM VehicleInfo WHERE MYR='"+selected_year+"'");
+
+    if(query.exec())
+    {
+        qDebug() << "Query Success:" <<  query.lastQuery() << endl;
     }
-    vmodel_data_model->setStringList(list_vmodel);
-    ui->comboBox_model->setModel(vmodel_data_model);
+    else
+    {
+        qDebug() << "Query Failed:" <<    query.lastQuery() << endl;
+        QMessageBox msg;
+        msg.setText("ERROR: Failed to query make information from the database. Please try again");
+        msg.exec();
+        return ;// Failed Query
+    }
+    while (query.next())
+    {
+        list_vmake.append(query.value(0).toString());
+    }
+
+    vmake_data_model->setStringList(list_vmake);
+    ui->comboBox_make->setModel(vmake_data_model);
 }
 
-void DVHlpvehiclelookup::UpdateUIMake(const QString &selected_model)
+void DVHlpvehiclelookup::UpdateUIModel(const QString &selected_make)
 {
-    QStringListModel *make_data_model = new QStringListModel;
-    QStringList list_make;
-    QString query_string = "SELECT DISTINCT MAKE FROM VehicleInfo WHERE MODEL='"+selected_model+"'";
+    QStringListModel *model_data_model = new QStringListModel;
+    QStringList list_model;
     QSqlQuery query;
-    query.exec(query_string);
-    while (query.next()) {
-        list_make.append(query.value(0).toString());
+    query.prepare("SELECT DISTINCT MODEL FROM VehicleInfo "
+                  "WHERE MYR='" + ui->comboBox_year->currentText() + "'"
+                                                                     "AND MAKE='" + selected_make + "'" );
+    if(query.exec())
+    {
+        qDebug() << "Query Success:" <<  query.lastQuery() << endl;
     }
-    make_data_model->setStringList(list_make);
-    ui->comboBox_make->setModel(make_data_model);
+    else
+    {
+        qDebug() << "Query Failed:" <<    query.lastQuery() << endl;
+        QMessageBox msg;
+        msg.setText("ERROR: Failed to query Model information from the database. Please try again");
+        msg.exec();
+        return ;// Failed Query
+    }
+
+    while (query.next())
+    {
+        list_model.append(query.value(0).toString());
+    }
+
+
+    model_data_model->setStringList(list_model);
+    ui->comboBox_model->setModel(model_data_model);
+}
+
+//CHANGES_A dedicated function added with SQL query not with QString but directly using Qsql prepare method.
+void DVHlpvehiclelookup::SetUIText(QString value, QLineEdit *line_edit)
+{
+    QString year = ui->comboBox_year->currentText();
+    QString model = ui->comboBox_model->currentText();
+    QString make = ui->comboBox_make->currentText() ;
+    QString result;
+    QSqlQuery query;
+    query.prepare("SELECT " + value +
+                  " FROM VehicleInfo"
+                  " WHERE MYR='"+ year + "'"
+                                         " AND MAKE='"+ make  + "'"
+                                                                " AND MODEL='" + model + "'");
+    query.exec();
+    while (query.next())
+    {
+        result = query.value(0).toString();
+    }
+
+    // After the query update the UI
+    line_edit->setText(result);
+
+
 }
 
 

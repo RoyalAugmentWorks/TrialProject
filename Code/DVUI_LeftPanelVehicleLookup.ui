@@ -20,10 +20,10 @@
       <widget class="QComboBox" name="comboBox_year"/>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_model"/>
+      <widget class="QComboBox" name="comboBox_make"/>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_make"/>
+      <widget class="QComboBox" name="comboBox_model"/>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_submit">
